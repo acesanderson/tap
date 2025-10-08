@@ -1,6 +1,6 @@
 # from context.query.vector import vector_search
 from contex.query.fuzzy import fuzzy_search
-from contex.obsidian.titles import get_titles
+from contex.database.obsidian.titles import get_titles
 import argparse
 import sys
 

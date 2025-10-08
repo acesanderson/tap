@@ -1,4 +1,4 @@
-from contex.obsidian.obsidian_path import get_obsidian_path
+from contex.database.obsidian.obsidian_path import get_obsidian_path
 import os
 
 OBSIDIAN_PATH = get_obsidian_path()
