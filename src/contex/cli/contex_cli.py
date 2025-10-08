@@ -3,16 +3,41 @@ from contex.query.fuzzy import fuzzy_search
 from contex.database.obsidian.vault import Vault
 import argparse
 import sys
+import json
+from rich.console import Console
+from pathlib import Path
 
 vault = Vault()
+console = Console()
+dir_path = Path(__file__).parent.resolve()
+matches_file = dir_path / ".matches.json"
+
+
+def display_titles(titles: list[str]):
+    for index, title in enumerate(titles):
+        console.print(
+            f"[yellow]{index + 1}[/yellow] - [green]{title}[/green][blue].md[/blue]"
+        )
+
+
+def shelve_matches(matches: list[tuple[str, int, int]]):
+    with open(matches_files, "w") as f:
+        json.dump(matches, f)
+
+
+def retrieve_matches() -> list[tuple[str, int, int]]:
+    if matches_file.exists():
+        with open(matches_file, "r") as f:
+            matches = json.load(f)
+            return matches
+    return []
 
 
 def get_fuzzy_matches(query: str, limit: int = 5):
     titles = vault.titles
     matches: list[tuple[str, int, int]] = fuzzy_search(query, titles, limit)
-    print(f"Top {limit} matches for '{query}':")
-    for match, score, rank in matches:
-        print(f"Match: {match}, Score: {score}")
+    titles = [title for title, _, _ in matches]
+    display_titles(titles)
 
 
 # def get_similarity_matches(query, limit=5):
