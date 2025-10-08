@@ -20,7 +20,16 @@ class Vault:
 
     @cached_property
     def paths(self) -> list[Path]:
-        return list(self.obsidian_path.rglob("*.md"))
+        # Recursively find all .md files in the obsidian_path directory and subdirectories;
+        # if duplicates, keep the first one found
+        md_files = list(self.obsidian_path.rglob("*.md"))
+        seen = set()
+        unique_files = []
+        for file in md_files:
+            if file.name not in seen:
+                seen.add(file.name)
+                unique_files.append(file)
+        return unique_files
 
     @cached_property
     def titles(self) -> list[str]:
