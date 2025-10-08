@@ -1,7 +1,9 @@
 from rapidfuzz import process, fuzz
 
 
-def fuzzy_search(query, choices, limit=5):
+def fuzzy_search(
+    query: str, choices: list[str], limit: int = 5
+) -> list[tuple[str, int, int]]:
     """
     Perform a fuzzy search to find the best matches for a given query from a list of choices.
 

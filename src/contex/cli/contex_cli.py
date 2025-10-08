@@ -1,13 +1,15 @@
 # from context.query.vector import vector_search
 from contex.query.fuzzy import fuzzy_search
-from contex.database.obsidian.titles import get_titles
+from contex.database.obsidian.vault import Vault
 import argparse
 import sys
 
+vault = Vault()
 
-def get_fuzzy_matches(query, limit=5):
-    titles = get_titles()
-    matches = fuzzy_search(query, titles, limit)
+
+def get_fuzzy_matches(query: str, limit: int = 5):
+    titles = vault.titles
+    matches: list[tuple[str, int, int]] = fuzzy_search(query, titles, limit)
     print(f"Top {limit} matches for '{query}':")
     for match, score, rank in matches:
         print(f"Match: {match}, Score: {score}")
@@ -35,6 +37,7 @@ def main():
     # group.add_argument(
     #     "-s", "--similarity", action="store_true", help="Use similarity
     args = parser.parse_args()
+    query = args.query
     if args.fuzzy:
         get_fuzzy_matches(args.query, args.limit)
         sys.exit(0)
