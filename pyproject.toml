@@ -25,4 +25,4 @@ database-clients = { path = "../database-clients", editable = true }
 
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]
-twig = "contex.cli.contex_cli:main"
+contex = "contex.cli.contex_cli:main"

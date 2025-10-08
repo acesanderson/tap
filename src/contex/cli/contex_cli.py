@@ -27,20 +27,21 @@ def main():
     parser = argparse.ArgumentParser(description="Fuzzy search for titles.")
     parser.add_argument("query", type=str, help="The search query.")
     parser.add_argument(
-        "--limit", type=int, default=5, help="Number of top matches to return."
+        "-l", "--limit", type=int, default=5, help="Number of top matches to return."
     )
     # Define mutually exclusive group for search type (-f / fuzzy or -s / similarity)
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "-f", "--fuzzy", action="store_true", help="Use fuzzy search (default)."
-    )
+    # group = parser.add_mutually_exclusive_group(required=True)
+    # group.add_argument(
+    #     "-f", "--fuzzy", action="store_true", help="Use fuzzy search (default)."
+    # )
     # group.add_argument(
     #     "-s", "--similarity", action="store_true", help="Use similarity
     args = parser.parse_args()
     query = args.query
-    if args.fuzzy:
-        get_fuzzy_matches(args.query, args.limit)
-        sys.exit(0)
+    limit = args.limit
+    # if args.fuzzy:
+    get_fuzzy_matches(query, limit)
+    sys.exit(0)
     # elif args.similarity:
     #     get_similarity_matches(args.query, args.limit)
     #     sys.exit(0)
