@@ -25,7 +25,7 @@ def vector_search(query: str, limit: int = 5) -> list[tuple[str, float]]:
 
     results = asyncio.run(_vector_search())
     matches = []
-    for doc, score in zip(results["documents"][0], results["distances"][0]):
+    for doc, score in zip(results["ids"][0], results["distances"][0]):
         matches.append((doc, score))
     return matches
 

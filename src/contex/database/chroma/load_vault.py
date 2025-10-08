@@ -33,20 +33,27 @@ async def get_vault_collection() -> AsyncCollection:
 
 async def load_vault(vault: Vault) -> AsyncCollection:
     logger.info(f"Loading vault from path: {vault.obsidian_path}")
-    collection = await get_vault_collection()
+    client = await get_client()
 
-    # Clear existing data
-    await collection.delete()
+    # Delete the entire collection if it exists
+    try:
+        await client.delete_collection(name=COLLECTION_NAME)
+        logger.info(f"Deleted existing collection: {COLLECTION_NAME}")
+    except Exception:
+        pass  # Collection didn't exist, that's fine
+
+    # Create fresh collection
+    collection = await client.create_collection(
+        name=COLLECTION_NAME, embedding_function=embedding_function
+    )
 
     # Add new data
     documents = vault.documents
     ids = vault.titles
 
-    # Load the data into the collection
     await collection.add(
         documents=documents,
         ids=ids,
-        metadatas=[{"source": str(path)} for path in vault.paths],
     )
 
     return collection
@@ -61,7 +68,7 @@ def main():
     async def check_collection():
         collection = await get_vault_collection()
         count = await collection.count()
-        logger.info(f"Number of items in the collection: {count['count']}")
+        logger.info(f"Number of items in the collection: {count}")
 
     asyncio.run(check_collection())
 
