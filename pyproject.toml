@@ -8,8 +8,20 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "database-clients",
+    "rapidfuzz>=3.14.1",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/contex"]
 sources = ["src"]
+include = ["src/contex/py.typed"]
+
+# ── uv sources (local/editable deps) ───────────────────────────────────────────
+[tool.uv.sources]
+database-clients = { path = "../database-clients", editable = true }
+
+# ── Scripts ────────────────────────────────────────────────────────────────────
+[project.scripts]
+twig = "contex.cli.contex_cli:main"
