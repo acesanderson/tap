@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "contex-project"
+name = "contex"
 version = "0.1.0"
-description = "Add your description here"
+description = "the poor man's siphon"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -25,4 +25,4 @@ database-clients = { path = "../database-clients", editable = true }
 
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]
-contex = "contex.cli.contex_cli:main"
+tap = "contex.cli.contex_cli:main"

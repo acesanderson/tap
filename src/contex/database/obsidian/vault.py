@@ -1,5 +1,5 @@
 from pathlib import Path
-from functools import cached_property
+from functools import cached_property, lru_cache
 from typing import override
 import os
 
@@ -46,6 +46,18 @@ class Vault:
                 print(f"Error reading {file}: {e}")
                 documents.append("")  # Append empty string on error
         return documents
+
+    @lru_cache
+    def get_document_by_title(self, title: str) -> str | None:
+        for file in self.paths:
+            if file.stem == title:
+                try:
+                    with file.open("r", encoding="utf-8") as f:
+                        return f.read()
+                except Exception as e:
+                    print(f"Error reading {file}: {e}")
+                    return None
+        return None
 
     @override
     def __repr__(self):
