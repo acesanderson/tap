@@ -2,6 +2,7 @@
 from contex.query.fuzzy import fuzzy_search
 from contex.database.obsidian.vault import Vault
 import argparse
+import re
 import sys
 import json
 from rich.console import Console
@@ -73,6 +74,28 @@ def get_document(index: int) -> str | None:
     return text
 
 
+def validate_date_range(date_range: str) -> bool:
+    pattern = r"^\d{4}-\d{2}-\d{2}:\d{4}-\d{2}-\d{2}$"
+    return bool(re.match(pattern, date_range))
+
+
+def get_date_range(date_range: str) -> str:
+    date_one = date_range.split(":")[0]
+    date_two = date_range.split(":")[1]
+    notes = vault.get_daily_notes_in_date_range(date_one, date_two)
+    # Combine notes into one markdown string with horizontal rules and # date headers
+    combined_notes = ""
+    for note in notes:
+        # Extract date from the first line of the note if it starts with a date
+        first_line = note.split("\n")[0]
+        if re.match(r"^\d{4}-\d{2}-\d{2}", first_line):
+            date_header = first_line
+        else:
+            date_header = "Note"
+        combined_notes += f"\n\n---\n\n# {date_header}\n\n{note}"
+    return combined_notes
+
+
 # def get_similarity_matches(query, limit=5):
 #     titles = get_titles()
 #     matches = vector_search(query, titles, limit)
@@ -100,6 +123,12 @@ def main():
         type=int,
         help="Get the title at the specified index from the last search results.",
     )
+    parser.add_argument(
+        "-d",
+        "--date_range",
+        type=str,
+        help="Retrieve daily notes for the specified date range (YYYY-MM-DD:YYYY-MM-DD).",
+    )
     # Define mutually exclusive group for search type (-f / fuzzy or -s / similarity)
     # group = parser.add_mutually_exclusive_group(required=True)
     # group.add_argument(
@@ -112,6 +141,7 @@ def main():
     limit: int = args.limit
     last: bool = args.last
     get: int = args.get
+    date_range: str = args.date_range
     # Archival functions
     if last:
         titles = [title for title, _, _ in retrieve_matches()]
@@ -124,6 +154,16 @@ def main():
         else:
             console.print(f"[red]Error:[/red] No document found at index {get}")
         sys.exit(0)
+    elif date_range:
+        if not validate_date_range(date_range):
+            console.print(
+                f"[red]Error:[/red] Invalid date range format. Use YYYY-MM-DD:YYYY-MM-DD"
+            )
+            sys.exit(1)
+        else:
+            combined_notes = get_date_range(date_range)
+            print_markdown(combined_notes)
+            sys.exit(0)
     # Query
     # if args.fuzzy:
     titles = get_fuzzy_matches(query, limit)
