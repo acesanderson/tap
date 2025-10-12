@@ -1,20 +1,3 @@
-# from context.query.vector import vector_search
-from contex.query.fuzzy import fuzzy_search
-from contex.database.obsidian.vault import Vault
-import argparse
-import re
-import sys
-import json
-from rich.console import Console
-from rich.markdown import Markdown
-from pathlib import Path
-
-vault = Vault()
-console = Console()
-dir_path = Path(__file__).parent.resolve()
-matches_file = dir_path / ".matches.json"
-
-
 def print_markdown(text: str):
     """
     Pretty print markdown text to the console.
@@ -177,3 +160,133 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from argparse import Namespace
+
+
+def route_command(args: Namespace):
+    """
+    Route to appropriate handler based on parsed args.
+    This function shows the routing logic.
+    """
+
+    # SUBCOMMANDS
+    if args.command == "stow":
+        return handle_stow(args.index)
+
+    elif args.command == "pool":
+        if args.pool_action is None:
+            # tap pool (no action)
+            return handle_pool_show()
+        elif args.pool_action == "pour":
+            return handle_pool_pour()
+        elif args.pool_action == "drain":
+            return handle_pool_drain()
+        elif args.pool_action == "remove":
+            return handle_pool_remove(args.index)
+        elif args.pool_action == "clear":
+            return handle_pool_clear()
+
+    elif args.command == "alias":
+        if args.alias_action == "rm":
+            # tap alias rm <name>
+            return handle_alias_remove(args.name)
+        elif args.alias_action is None:
+            # Could be: tap alias, tap alias <name> <target>, or tap alias <name> -g <index>
+            if args.name is None:
+                # tap alias (list all)
+                return handle_alias_list()
+            elif args.get is not None:
+                # tap alias <name> -g <index>
+                return handle_alias_create(args.name, index=args.get)
+            elif args.target is not None:
+                # tap alias <name> <target>
+                return handle_alias_create(args.name, title=args.target)
+            else:
+                # Just name provided, ambiguous
+                print("Error: Provide either a target title or use -g flag with index")
+                sys.exit(1)
+
+    # DEFAULT COMMAND (search/retrieval)
+    elif args.command is None:
+        # Flags take precedence
+        if args.last:
+            return handle_show_last()
+        elif args.get is not None:
+            return handle_get(args.get)
+        elif args.date_range:
+            return handle_date_range(args.date_range)
+        elif args.query:
+            # Main search with resolution
+            return handle_search(
+                args.query,
+                limit=args.limit,
+                force_fuzzy=args.fuzzy,
+                force_exact=args.exact,
+            )
+        else:
+            # No query, no flags
+            print("Error: Provide a query or use a flag")
+            parser.print_help()
+            sys.exit(1)
+
+    else:
+        print(f"Unknown command: {args.command}")
+        sys.exit(1)
+
+
+# Placeholder handler functions (to be implemented)
+def handle_stow(index):
+    pass
+
+
+def handle_pool_show():
+    pass
+
+
+def handle_pool_pour():
+    pass
+
+
+def handle_pool_drain():
+    pass
+
+
+def handle_pool_remove(index):
+    pass
+
+
+def handle_pool_clear():
+    pass
+
+
+def handle_alias_remove(name):
+    pass
+
+
+def handle_alias_list():
+    pass
+
+
+def handle_alias_create(name, index=None, title=None):
+    pass
+
+
+def handle_show_last():
+    pass
+
+
+def handle_get(index):
+    pass
+
+
+def handle_date_range(date_range):
+    pass
+
+
+def handle_search(query, limit, force_fuzzy, force_exact):
+    pass
