@@ -21,7 +21,7 @@ embedding_function = SentenceTransformerEmbeddingFunction(
 vault = Vault()
 
 
-async def get_vault_collection() -> AsyncCollection:
+async def get_vault_descriptions_collection() -> AsyncCollection:
     logger.info(
         f"Using embedding model: {embedding_model} on device: {detect_device()}"
     )
@@ -66,7 +66,7 @@ def main():
 
     # Check the number of items in the collection
     async def check_collection():
-        collection = await get_vault_collection()
+        collection = await get_vault_descriptions_collection()
         count = await collection.count()
         logger.info(f"Number of items in the collection: {count}")
 
