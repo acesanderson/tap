@@ -9,7 +9,7 @@ description = "for now, the poor man's siphon and a replacement for obsidian's b
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "database-clients",
+    "dbclients",
     "rapidfuzz>=3.14.1",
     "sentence-transformers>=5.1.1",
 ]
@@ -21,7 +21,7 @@ include = ["src/tap/py.typed"]
 
 # ── uv sources (local/editable deps) ───────────────────────────────────────────
 [tool.uv.sources]
-database-clients = { path = "../database-clients", editable = true }
+dbclients = { path = "../dbclients", editable = true }
 
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]
