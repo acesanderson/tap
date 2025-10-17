@@ -1,3 +1,13 @@
+import argparse
+import json
+import re
+import sys
+from rich.console import Console
+from rich.markdown import Markdown
+
+console = Console()
+
+
 def print_markdown(text: str):
     """
     Pretty print markdown text to the console.

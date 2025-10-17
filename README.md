@@ -1,4 +1,4 @@
-# contex
+# Tap
 
 **Compose Obsidian knowledge artifacts into LLM-ready context streams.**
 
@@ -53,24 +53,24 @@ pip install -e .
 export OBSIDIAN_VAULT="$HOME/Documents/Obsidian"
 
 # Optional: Vector search requires running Chroma server
-# (contex imports your existing Chroma connection library)
+# (tapimports your existing Chroma connection library)
 ```
 
 ### Basic Usage
 
 ```bash
 # Find a file
-contex "mental health" -s
+tap"mental health" -s
 # → Matched: Mental Health Context.md
 
 # Pipe to LLM
-contex "mental health" | twig "Analyze my triggers"
+tap"mental health" | twig "Analyze my triggers"
 
 # Chain multiple contexts
-contex -a "linkedin" | contex "mental health" | twig "Career burnout advice"
+tap-a "linkedin" | tap"mental health" | twig "Career burnout advice"
 
 # Tag arbitrary content
-cat data.csv | contex -p "product-catalog" | twig "Analyze this data"
+cat data.csv | tap-p "product-catalog" | twig "Analyze this data"
 ```
 
 ---
@@ -83,7 +83,7 @@ cat data.csv | contex -p "product-catalog" | twig "Analyze this data"
 Searches Obsidian vault using fuzzy matching or vector similarity, wraps result in XML tags.
 
 ```bash
-contex "linkedin" -t "profile"
+tap"linkedin" -t "profile"
 # → <profile>[content of LinkedIn Professional Context.md]</profile>
 ```
 
@@ -91,7 +91,7 @@ contex "linkedin" -t "profile"
 Tags stdin without performing any file lookup. Enables tagging arbitrary content streams.
 
 ```bash
-cat file.txt | contex -p "data"
+cat file.txt | tap-p "data"
 # → <data>[stdin content]</data>
 ```
 
@@ -99,7 +99,7 @@ cat file.txt | contex -p "data"
 Uses predefined shortcuts for frequently accessed contexts. Aliases map to specific files with custom tags.
 
 ```bash
-contex -a "linkedin"
+tap-a "linkedin"
 # → <linkedin>[content from aliased file]</linkedin>
 ```
 
@@ -109,7 +109,7 @@ contex -a "linkedin"
 Uses RapidFuzz for fast, deterministic title matching. Handles typos and partial queries.
 
 ```bash
-contex "mental health"
+tap"mental health"
 # Matches: "Mental Health Context.md"
 ```
 
@@ -117,7 +117,7 @@ contex "mental health"
 Uses your existing Chroma server for semantic search. Better for conceptual queries.
 
 ```bash
-contex -v "stuff about emotional triggers"
+tap-v "stuff about emotional triggers"
 # Finds semantically related content even if title doesn't match
 ```
 
@@ -139,7 +139,7 @@ Tags follow kebab-case convention and are derived from filenames:
 
 Override with `-t` flag:
 ```bash
-contex "linkedin" -t "profile"
+tap"linkedin" -t "profile"
 # → <profile>...</profile>
 ```
 
@@ -148,7 +148,7 @@ contex "linkedin" -t "profile"
 `contex` reads from stdin and appends its output, enabling chaining:
 
 ```bash
-contex -a "linkedin" | contex "mental health" | twig "..."
+tap-a "linkedin" | tap"mental health" | twig "..."
 # Produces: <linkedin>...</linkedin><mental-health-context>...</mental-health-context>
 ```
 
@@ -189,9 +189,9 @@ Aliases are predefined mappings stored in `~/.config/contex/aliases.json`:
 ### Command Signature
 
 ```
-contex [QUERY] [OPTIONS]
-contex -a <ALIAS> [OPTIONS]
-contex -p <TAG> [OPTIONS]
+tap[QUERY] [OPTIONS]
+tap-a <ALIAS> [OPTIONS]
+tap-p <TAG> [OPTIONS]
 ```
 
 **Mutually exclusive modes:**
@@ -246,19 +246,19 @@ contex -p <TAG> [OPTIONS]
 
 #### Simple lookup with default tag
 ```bash
-contex "mental health"
+tap"mental health"
 # Output: <mental-health-context>[file content]</mental-health-context>
 ```
 
 #### Custom tag override
 ```bash
-contex "sales strategy" -t "strategy"
+tap"sales strategy" -t "strategy"
 # Output: <strategy>[file content]</strategy>
 ```
 
 #### Show matched filename
 ```bash
-contex "linkedin professional" -s
+tap"linkedin professional" -s
 # stderr: Matched: LinkedIn Professional Context.md
 # stdout: <linkedin-professional-context>[file content]</linkedin-professional-context>
 ```
@@ -267,14 +267,14 @@ contex "linkedin professional" -s
 
 #### Semantic query
 ```bash
-contex -v "stuff about emotional triggers and work avoidance"
+tap-v "stuff about emotional triggers and work avoidance"
 # Uses Chroma vector similarity instead of fuzzy matching
 # Might match "Mental Health Context.md" even though query doesn't contain those words
 ```
 
 #### Vector search with source display
 ```bash
-contex -v "burnout and isolation" -s
+tap-v "burnout and isolation" -s
 # stderr: Vector match: Mental Health Context.md (similarity: 0.87)
 # stdout: <mental-health-context>[file content]</mental-health-context>
 ```
@@ -283,7 +283,7 @@ contex -v "burnout and isolation" -s
 
 #### Create alias (interactive)
 ```bash
-contex "linkedin professional" -m
+tap"linkedin professional" -m
 # Matched: LinkedIn Professional Context.md
 # Create alias? (y/n): y
 # Alias name [linkedin-professional-context]: linkedin
@@ -291,18 +291,18 @@ contex "linkedin professional" -m
 # ✓ Alias created
 
 # Or non-interactive:
-contex "linkedin professional" -m "linkedin"
+tap"linkedin professional" -m "linkedin"
 ```
 
 #### Use alias
 ```bash
-contex -a "linkedin"
+tap-a "linkedin"
 # Output: <linkedin>[file content]</linkedin>
 ```
 
 #### List all aliases
 ```bash
-contex --list-aliases
+tap--list-aliases
 # Available aliases:
 #   linkedin          → LinkedIn Professional Context.md (used 47 times)
 #   mental-health     → Mental Health Context.md (used 23 times)
@@ -311,7 +311,7 @@ contex --list-aliases
 
 #### Remove alias
 ```bash
-contex --remove-alias "old-context"
+tap--remove-alias "old-context"
 # ✓ Alias 'old-context' removed
 ```
 
@@ -319,13 +319,13 @@ contex --remove-alias "old-context"
 
 #### Tag arbitrary stdin
 ```bash
-cat work_report.txt | contex -p "report"
+cat work_report.txt | tap-p "report"
 # Output: <report>[stdin content]</report>
 ```
 
 #### Chain passthrough with lookup
 ```bash
-cat data.csv | contex -p "product-catalog" | contex -a "linkedin"
+cat data.csv | tap-p "product-catalog" | tap-a "linkedin"
 # Output: <product-catalog>[csv]</product-catalog><linkedin>[context]</linkedin>
 ```
 
@@ -333,23 +333,23 @@ cat data.csv | contex -p "product-catalog" | contex -a "linkedin"
 
 #### Two contexts
 ```bash
-contex -a "linkedin" | contex "mental health" | twig "Analyze career burnout"
+tap-a "linkedin" | tap"mental health" | twig "Analyze career burnout"
 # Combines: <linkedin>...</linkedin><mental-health-context>...</mental-health-context>
 ```
 
 #### Three contexts with custom tags
 ```bash
-contex -a "linkedin" | \
-  contex "mental health" -t "therapy" | \
-  contex "work projects" -t "current-work" | \
+tap-a "linkedin" | \
+  tap"mental health" -t "therapy" | \
+  tap"work projects" -t "current-work" | \
   twig "Help me prioritize tasks"
 ```
 
 #### Mixed passthrough and lookup
 ```bash
 cat current_resume.pdf | \
-  contex -p "resume" | \
-  contex -a "linkedin" | \
+  tap-p "resume" | \
+  tap-a "linkedin" | \
   twig "Compare my resume to my LinkedIn profile"
 ```
 
@@ -357,39 +357,39 @@ cat current_resume.pdf | \
 
 #### Basic question with context
 ```bash
-contex -a "mental-health" | twig "What are my trigger patterns?" -a "Focus on work domain"
+tap-a "mental-health" | twig "What are my trigger patterns?" -a "Focus on work domain"
 ```
 
 #### Multi-turn conversation
 ```bash
-contex -a "linkedin" | contex -a "mental-health" | twig "Career advice" --chat
+tap-a "linkedin" | tap-a "mental-health" | twig "Career advice" --chat
 # --chat flag preserves conversation history in twig
 ```
 
 ### Integration with Siphon
 
-#### Siphon output → contex tagging → LLM
+#### Siphon output → taptagging → LLM
 ```bash
 siphon sales_presentation.pptx -r c | \
-  contex -p "sales-deck" | \
-  contex "sales strategy for FY26" -t "strategy" | \
-  contex -a "linkedin" | \
+  tap-p "sales-deck" | \
+  tap"sales strategy for FY26" -t "strategy" | \
+  tap-a "linkedin" | \
   twig "Look at my job, our strategy, and our pitch deck" \
        -a "Critique the deck and suggest additional collateral"
 ```
 
 **Explanation:**
 1. `siphon sales_presentation.pptx -r c`: Converts PowerPoint to text using MarkItDown
-2. `contex -p "sales-deck"`: Tags Siphon output as `<sales-deck>`
-3. `contex "sales strategy for FY26" -t "strategy"`: Adds `<strategy>` from Obsidian
-4. `contex -a "linkedin"`: Adds `<linkedin>` context
+2. `tap-p "sales-deck"`: Tags Siphon output as `<sales-deck>`
+3. `tap"sales strategy for FY26" -t "strategy"`: Adds `<strategy>` from Obsidian
+4. `tap-a "linkedin"`: Adds `<linkedin>` context
 5. `twig`: Sends composed context to LLM
 
 #### Audio transcription with context
 ```bash
 siphon meeting_recording.m4a -r c | \
-  contex -p "meeting-transcript" | \
-  contex -a "work-projects" | \
+  tap-p "meeting-transcript" | \
+  tap-a "work-projects" | \
   twig "Summarize action items and assign to projects"
 ```
 
@@ -442,7 +442,7 @@ export CHROMA_PORT="8000"
 
 **Example ambiguous scenario:**
 ```bash
-contex "health"
+tap"health"
 # Error: Ambiguous match. Did you mean:
 #   1. Mental Health Context.md (score: 85)
 #   2. Dad Health Context.md (score: 85)
@@ -672,8 +672,8 @@ Multiple files matched with similar scores:
 
 To resolve:
   - Be more specific: 'mental health' or 'dad health'
-  - Use vector search: contex -v 'health'
-  - Create an alias: contex 'mental health' -m 'mental-health'
+  - Use vector search: tap-v 'health'
+  - Create an alias: tap'mental health' -m 'mental-health'
 ```
 
 #### File not found (alias pointing to deleted file)
@@ -681,7 +681,7 @@ To resolve:
 Error: File not found: 'LinkedIn Professional Context.md'
 
 Alias 'linkedin' points to a file that no longer exists.
-Remove outdated alias: contex --remove-alias linkedin
+Remove outdated alias: tap--remove-alias linkedin
 ```
 
 #### Mode conflict
@@ -689,9 +689,9 @@ Remove outdated alias: contex --remove-alias linkedin
 Error: Cannot use -a (alias) and -p (passthrough) together
 
 Usage:
-  contex [QUERY] [OPTIONS]       # Lookup mode
-  contex -a <ALIAS> [OPTIONS]    # Alias mode
-  contex -p <TAG> [OPTIONS]      # Passthrough mode
+  tap[QUERY] [OPTIONS]       # Lookup mode
+  tap-a <ALIAS> [OPTIONS]    # Alias mode
+  tap-p <TAG> [OPTIONS]      # Passthrough mode
 ```
 
 ### Deduplication (v0.2 feature)
@@ -721,7 +721,7 @@ def compose_stream(stdin_content: str, new_content: str, tag: str,
 
 **Usage in chained calls:**
 ```bash
-contex -a "linkedin" | contex "LinkedIn Professional Context.md" | twig "..."
+tap-a "linkedin" | tap"LinkedIn Professional Context.md" | twig "..."
 # stderr: Warning: Duplicate content for tag 'linkedin-professional-context' (skipping)
 ```
 
@@ -753,7 +753,7 @@ contex -a "linkedin" | contex "LinkedIn Professional Context.md" | twig "..."
 - Handles image input from clipboard
 - Provides chat mode for multi-turn conversations
 
-**How contex complements Twig:**
+**How tapcomplements Twig:**
 
 `contex` injects **persistent knowledge artifacts** into Twig queries:
 
@@ -762,7 +762,7 @@ contex -a "linkedin" | contex "LinkedIn Professional Context.md" | twig "..."
 twig "I'm feeling burned out at work. Here's my background: [paste 300 lines]"
 
 # With contex: Automatic context injection
-contex -a "linkedin" | contex -a "mental-health" | twig "I'm feeling burned out at work"
+tap-a "linkedin" | tap-a "mental-health" | twig "I'm feeling burned out at work"
 ```
 
 **Division of labor:**
@@ -777,7 +777,7 @@ contex -a "linkedin" | contex -a "mental-health" | twig "I'm feeling burned out 
 - Generates AI-enriched metadata (titles, summaries, descriptions)
 - Provides "Sourdough" auto-maintained knowledge bases (future)
 
-**How contex relates to Siphon:**
+**How taprelates to Siphon:**
 
 #### Current State (v0.1)
 `contex` and Siphon are **complementary tools** that compose via pipes:
@@ -785,8 +785,8 @@ contex -a "linkedin" | contex -a "mental-health" | twig "I'm feeling burned out 
 ```bash
 # Siphon processes complex sources
 siphon presentation.pptx -r c | \
-  contex -p "deck" | \           # contex tags Siphon output
-  contex -a "strategy" | \       # contex adds Obsidian context
+  tap-p "deck" | \           # taptags Siphon output
+  tap-a "strategy" | \       # tapadds Obsidian context
   twig "Critique this deck"
 ```
 
@@ -800,11 +800,11 @@ siphon presentation.pptx -r c | \
 
 ```bash
 # v0.3: Siphon backend option
-contex -v "burnout patterns" --backend siphon
+tap-v "burnout patterns" --backend siphon
 # Uses Siphon's PostgreSQL cache instead of direct Obsidian access
 
 # v0.4: Automatic Siphon fallback
-contex "that podcast about AI agents"
+tap"that podcast about AI agents"
 # Searches Obsidian first, falls back to Siphon cache if not found
 ```
 
@@ -818,7 +818,7 @@ contex "that podcast about AI agents"
 
 Both `contex` and Siphon are building toward **auto-maintained knowledge bases:**
 
-**contex contribution:**
+**tapcontribution:**
 - Tracks which contexts are used together (co-occurrence patterns)
 - Records usage frequency and recency
 - Identifies stale contexts (not updated in 30+ days)
@@ -831,22 +831,22 @@ Both `contex` and Siphon are building toward **auto-maintained knowledge bases:*
 **Combined "Sourdough" workflow (future):**
 ```bash
 # Initialize a living knowledge base
-contex --sourdough create "ai-strategy" \
+tap--sourdough create "ai-strategy" \
   --sources "Obsidian:AI Strategy/*.md" \
             "Siphon:tag=competitors" \
             "Siphon:source_type=earnings_call"
 
 # Auto-maintains based on usage patterns
-contex --sourdough feed "ai-strategy"
+tap--sourdough feed "ai-strategy"
 # Ingests new content, updates summaries, prunes outdated info
 
 # Use as regular context
-contex -a "ai-strategy" | twig "What's our competitive position?"
+tap-a "ai-strategy" | twig "What's our competitive position?"
 ```
 
 ### Tool Comparison Matrix
 
-| Feature | contex | Twig | Siphon |
+| Feature | tap| Twig | Siphon |
 |---------|--------|------|--------|
 | **Purpose** | Context injection | LLM querying | Universal ingestion |
 | **Input sources** | Obsidian markdown | stdin, clipboard | 11+ types (PDF, audio, video, etc.) |
@@ -861,26 +861,26 @@ contex -a "ai-strategy" | twig "What's our competitive position?"
 
 #### Simple context + query
 ```bash
-contex -a "linkedin" | twig "Summarize my experience"
+tap-a "linkedin" | twig "Summarize my experience"
 ```
 
 #### Multi-context reasoning
 ```bash
-contex -a "linkedin" | contex -a "mental-health" | \
+tap-a "linkedin" | tap-a "mental-health" | \
   twig "How can I avoid burnout in my current role?"
 ```
 
 #### External file + context
 ```bash
-cat job_description.txt | contex -p "job-posting" | contex -a "linkedin" | \
+cat job_description.txt | tap-p "job-posting" | tap-a "linkedin" | \
   twig "Should I apply for this role?"
 ```
 
-#### Siphon + contex + Twig pipeline
+#### Siphon + tap+ Twig pipeline
 ```bash
 siphon competitor_earnings.mp3 -r c | \
-  contex -p "earnings-transcript" | \
-  contex -a "our-strategy" | \
+  tap-p "earnings-transcript" | \
+  tap-a "our-strategy" | \
   twig "Compare their strategy to ours"
 ```
 
@@ -889,9 +889,9 @@ siphon competitor_earnings.mp3 -r c | \
 # Use Siphon's research CLI for multi-document analysis
 research_cli.py "competitive positioning" --dir ./intel/
 
-# Then use contex to inject results into ongoing conversation
+# Then use tapto inject results into ongoing conversation
 siphon research_results.json -r c | \
-  contex -p "research-findings" | \
+  tap-p "research-findings" | \
   twig "Based on this research, recommend next steps" --chat
 ```
 
