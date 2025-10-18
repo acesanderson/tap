@@ -13,6 +13,7 @@ dependencies = [
     "database-clients",
     "rapidfuzz>=3.14.1",
     "sentence-transformers>=5.1.1",
+    "xdg-base-dirs>=6.0.2",
 ]
 
 [tool.hatch.build.targets.wheel]
