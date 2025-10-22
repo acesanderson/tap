@@ -9,7 +9,7 @@ def get_similarity_matches(query, limit=5):
         print(f"Match: {match}, Similarity Score: {score}")
 """
 
-from contex.database.chroma.load_vault import get_vault_collection
+from tap.database.chroma.load_vault import get_vault_collection
 
 
 def vector_search(query: str, limit: int = 5) -> list[tuple[str, float]]:

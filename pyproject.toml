@@ -7,10 +7,10 @@ name = "tap"
 version = "0.1.0"
 description = "for now, the poor man's siphon and a replacement for obsidian's bad search. Eventually: a shell, with MCP, my replacement for claude desktop."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "click>=8.3.0",
-    "database-clients",
+    "dbclients",
     "rapidfuzz>=3.14.1",
     "sentence-transformers>=5.1.1",
     "xdg-base-dirs>=6.0.2",
@@ -23,7 +23,7 @@ include = ["src/tap/py.typed"]
 
 # ── uv sources (local/editable deps) ───────────────────────────────────────────
 [tool.uv.sources]
-database-clients = { path = "../database-clients", editable = true }
+dbclients = { path = "../dbclients-project", editable = true }
 
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]

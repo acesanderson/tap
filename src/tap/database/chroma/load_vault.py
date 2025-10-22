@@ -1,5 +1,5 @@
 from dbclients.clients.chroma import get_client, detect_device
-from contex.database.obsidian.vault import Vault
+from tap.database.obsidian.vault import Vault
 from chromadb.utils.embedding_functions import (
     SentenceTransformerEmbeddingFunction,
 )
