@@ -6,14 +6,25 @@ from tap.search.match_class import Matches
 LATEST_MATCHES_FILE = xdg_data_home() / "tap" / "latest_matches.json"
 
 
-@click.group(name="tap", invoke_without_command=True)
+@click.command()
 @click.argument("query", required=False)
 @click.option("--limit", "-L", default=5, help="Number of results")
 @click.option("--last", "-l", is_flag=True, help="Show last search results")
 @click.option("--get", "-g", type=int, help="Get item at index")
 @click.option("--date-range", "-d", help="Date range YYYY-MM-DD:YYYY-MM-DD")
+@click.option("--fuzzy", "-f", is_flag=True, help="Use fuzzy search")
+@click.option("--exact", "-e", is_flag=True, help="Use exact match search")
 @click.pass_context
-def search_group(ctx, query, limit, last, get, date_range, fuzzy, exact):
+def search(
+    ctx,
+    query,
+    limit,
+    last,
+    get,
+    date_range: str,
+    fuzzy: bool = True,
+    exact: bool = False,
+):
     """Search vault notes"""
     if last:
         handle_show_last()
@@ -58,5 +69,5 @@ def handle_date_range(date_range: str):
     raise NotImplementedError("Date range search not implemented yet")
 
 
-def handle_search(query: str, limit: int):
+def handle_search(query: str, limit: int, fuzzy: bool, exact: bool):
     raise NotImplementedError("Search command not implemented yet")

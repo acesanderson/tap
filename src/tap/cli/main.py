@@ -1,23 +1,33 @@
 """
 Tap CLI - Main Entry Point
 Search is the default command when no subcommand is provided, hence the logic is in this file.
+
+WIP: monadic use case Tap can concatenate input with multiple runs of the CLI in a pipe,
+and context is wrapped in XML context tags.
+Example:
+$ echo "<context>...</context>" | tap search "query" | tap alias "linkedin prof context" <--- produces three xml blobs to stdout
 """
 
 import click
 from tap.cli.commands import alias, pool, stow, search
+from tap.cli.implicit.implicit_input import ImplicitInput
 
 
-@click.group(invoke_without_command=True)
+@click.group()
 @click.pass_context
 def cli(ctx):
     """Tap - Search and compose context from your Obsidian vault"""
+    if ctx.obj is None:
+        ctx.obj = {}
+    if "implicit" not in ctx.obj:
+        ctx.obj["implicit"] = ImplicitInput()
     # This is the root command
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
 
 
 # Register other command groups
-cli.add_command(search.search_group, name="search")
+cli.add_command(search.search, name="search")
 cli.add_command(alias.alias_group, name="alias")
 cli.add_command(pool.pool_group, name="pool")
 cli.add_command(stow.stow, name="stow")
