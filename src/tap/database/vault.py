@@ -1,8 +1,12 @@
+from __future__ import annotations
 from functools import cached_property, lru_cache
-from contex.database.obsidian.obsidian_note import ObsidianNote
-from typing import override
+from tap.database.obsidian.obsidian_note import ObsidianNote
+from typing import override, TYPE_CHECKING
 from pathlib import Path
 import os
+
+if TYPE_CHECKING:
+    from chromadb.api.models.AsyncCollection import AsyncCollection
 
 
 class Vault:
@@ -98,6 +102,11 @@ class Vault:
             except Exception as e:
                 print(f"Error reading {file}: {e}")
         return notes
+
+    async def get_chroma_collection(self) -> AsyncCollection:
+        from tap.database.chroma.load_vault import get_vault_collection
+
+        return await get_vault_collection()
 
     @override
     def __repr__(self):

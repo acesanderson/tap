@@ -1,19 +1,15 @@
-from rapidfuzz import process, fuzz
+from tap.database.vault import Vault
+from tap.search.match_class import Match, Matches
 
 
-def fuzzy_search(
-    query: str, choices: list[str], limit: int = 5
-) -> list[tuple[str, int, int]]:
-    """
-    Perform a fuzzy search to find the best matches for a given query from a list of choices.
+def fuzzy_search(query: str, limit: int, vault: Vault) -> Matches:
+    from rapidfuzz import process, fuzz
 
-    Parameters:
-    query (str): The search query.
-    choices (list): A list of strings to search within.
-    limit (int): The maximum number of matches to return.
-
-    Returns:
-    list: A list of tuples containing the best matches and their scores.
-    """
+    choices = vault.titles
     results = process.extract(query, choices, scorer=fuzz.WRatio, limit=limit)
-    return results
+    matches = [
+        Match(title=title, score=score, rank=rank + 1)
+        for rank, (title, score, _) in enumerate(results)
+    ]
+    matches_obj = Matches(query=query, results=matches)
+    return matches_obj

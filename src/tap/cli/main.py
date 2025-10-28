@@ -11,16 +11,24 @@ $ echo "<context>...</context>" | tap search "query" | tap alias "linkedin prof 
 import click
 from tap.cli.commands import alias, pool, stow, search
 from tap.cli.implicit.implicit_input import ImplicitInput
+from tap.database.obsidian.vault import Vault
 
 
 @click.group()
 @click.pass_context
 def cli(ctx):
-    """Tap - Search and compose context from your Obsidian vault"""
+    """
+    Tap - Search and compose context from your Obsidian vault
+    """
+    # Initialize context object if not present
     if ctx.obj is None:
         ctx.obj = {}
+    # Grab implicit input from stdin
     if "implicit" not in ctx.obj:
         ctx.obj["implicit"] = ImplicitInput()
+    # Initialize Vault
+    if "vault" not in ctx.obj:
+        ctx.obj["vault"] = Vault()
     # This is the root command
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())

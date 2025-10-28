@@ -1,30 +1,15 @@
-from dbclients.clients.chroma import get_client, detect_device
-from tap.database.obsidian.vault import Vault
-from chromadb.utils.embedding_functions import (
-    SentenceTransformerEmbeddingFunction,
-)
+from dbclients.clients.chroma import get_client
+from conduit.embeddings.generate_embeddings import generate_embeddings, quick_embedding
+from tap.database.vault import Vault
 from chromadb.api.models.AsyncCollection import AsyncCollection
-from typing import Literal
 import logging
 
 logger = logging.getLogger(__name__)
 
 COLLECTION_NAME = "obsidian_vault"
 
-## Configure embedding function
-embedding_model: Literal["gtr-t5-large", "all-MiniLM-L6-v2"] = "all-MiniLM-L6-v2"
-embedding_function = SentenceTransformerEmbeddingFunction(
-    model_name=embedding_model, device=detect_device()
-)
-
-## Our vault
-vault = Vault()
-
 
 async def get_vault_collection() -> AsyncCollection:
-    logger.info(
-        f"Using embedding model: {embedding_model} on device: {detect_device()}"
-    )
     client = await get_client()
     return await client.get_or_create_collection(
         name=COLLECTION_NAME, embedding_function=embedding_function
@@ -50,17 +35,39 @@ async def load_vault(vault: Vault) -> AsyncCollection:
     # Add new data
     documents = vault.documents
     ids = vault.titles
+    embeddings = generate_embeddings(ids=ids, documents=documents)
 
     await collection.add(
         documents=documents,
         ids=ids,
+        embeddings=embeddings,
     )
 
     return collection
 
 
+def query_collection(query: str, top_k: int = 5):
+    """
+    Query the vault collection for similar documents.
+    """
+    import asyncio
+
+    async def _query():
+        collection = await get_vault_collection()
+        query_embedding = quick_embedding(query)
+        results = await collection.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+        )
+        return results
+
+    return asyncio.run(_query())
+
+
 def main():
     import asyncio
+
+    vault = Vault()
 
     asyncio.run(load_vault(vault))
 
