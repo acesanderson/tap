@@ -1,0 +1,27 @@
+{
+  "aliases": {
+    "lic": "LinkedIn Professional Context",
+    "layoffs": "MEET-2025-10-15-ALLHANDSLAYOFFS",
+    "bd": "Business Development at LinkedIn",
+    "mid": "Middlegame Context"
+  },
+  "repos": {
+    "conduit": "conduit-project",
+    "kramer": "kramer-project",
+    "tap": "tap-project",
+    "siphon": "siphon",
+    "siphons": "siphon-project/siphon-server",
+    "siphona": "siphon-project/siphon-api",
+    "siphonc": "siphon-project/siphon-client",
+    "mentor": "mentor-project",
+    "waterworks": "waterworks-project",
+    "headwater": "headwater",
+    "hdws": "headwater/headwater-server",
+    "hdwa": "headwater/headwater-api",
+    "hdwc": "headwater/headwater-client",
+    "haddock": "haddock-project",
+    "aquifer": "aquifer-project",
+    "note": "note-project",
+    "dbclients": "dbclients-project"
+  }
+}
