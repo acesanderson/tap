@@ -1,4 +1,4 @@
-# contex
+# tap
 
 **Compose Obsidian knowledge artifacts into LLM-ready context streams.**
 
