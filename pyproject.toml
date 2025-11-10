@@ -32,3 +32,4 @@ siphon = { path = "../siphon-project", editable = true }
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]
 tap = "tap.cli.main:main"
+flatten = "tap.scripts.flatten_cli:main"
