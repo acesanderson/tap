@@ -6,10 +6,10 @@ Handles fetching and flattening GitHub repositories into XML format.
 import os
 import zipfile
 from io import BytesIO
-from typing import Iterator, Tuple
+from collections.abc import Iterator
 import requests
 
-from siphon.ingestion.github.flatten_xml import (
+from tap.scripts.flatten.flatten_xml import (
     package_to_xml,
     should_exclude_path,
     should_include_file,

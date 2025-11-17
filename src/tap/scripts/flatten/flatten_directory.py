@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Callable
 from collections.abc import Iterable
 
-from siphon.ingestion.github.flatten_xml import (
+from tap.scripts.flatten.flatten_xml import (
     package_to_xml,
     should_exclude_path,
     should_include_file,
