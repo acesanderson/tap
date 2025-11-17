@@ -14,7 +14,6 @@ dependencies = [
     "headwater_api",
     "rapidfuzz>=3.14.1",
     "sentence-transformers>=5.1.1",
-    "siphon",
     "xdg-base-dirs>=6.0.2",
 ]
 
@@ -27,7 +26,6 @@ include = ["src/tap/py.typed"]
 [tool.uv.sources]
 dbclients = { path = "../dbclients-project", editable = true }
 headwater_api = { path = "../headwater/headwater-api", editable = true }
-siphon = { path = "../siphon-project", editable = true }
 
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]

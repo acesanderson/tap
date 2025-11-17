@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Flatten - CLI tool for converting GitHub repositories and local directories
 into LLM-friendly XML format.
@@ -124,7 +123,7 @@ def main():
     assert output is not None, "No target repo provided."
     # Handle --docs flag to generate README
     if args.docs:
-        from siphon.scripts.flatten.generate_docs import generate_docs
+        from tap.scripts.flatten.generate_docs import generate_docs
 
         prompt_type = args.verbose
         response = generate_docs(xml_string=output, prompt_type=prompt_type)
