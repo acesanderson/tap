@@ -12,6 +12,7 @@ dependencies = [
     "click>=8.3.0",
     "dbclients",
     "headwater_api",
+    "pytesseract>=0.3.13",
     "rapidfuzz>=3.14.1",
     "sentence-transformers>=5.1.1",
     "xdg-base-dirs>=6.0.2",
@@ -31,3 +32,4 @@ headwater_api = { path = "../headwater/headwater-api", editable = true }
 [project.scripts]
 tap = "tap.cli.main:main"
 flatten = "tap.scripts.flatten_cli:main"
+ocr = "tap.scripts.ocr_cli:main"
