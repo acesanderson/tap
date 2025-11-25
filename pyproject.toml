@@ -7,7 +7,7 @@ name = "tap"
 version = "0.1.0"
 description = "for now, the poor man's siphon and a replacement for obsidian's bad search. Eventually: a shell, with MCP, my replacement for claude desktop."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "argparse",
     "dbclients",
