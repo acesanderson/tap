@@ -62,7 +62,7 @@ def get_local_file_iterator(directory: Path) -> Callable:
     return iterator
 
 
-def flatten_directory(directory_path: str = ".") -> str:
+def flatten_directory(directory_path: str | Path = ".") -> str:
     """
     Flatten a local directory into XML format.
 

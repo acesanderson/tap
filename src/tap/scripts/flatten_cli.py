@@ -16,10 +16,12 @@ Options:
 
 from tap.scripts.flatten.flatten_directory import flatten_directory
 from tap.scripts.flatten.flatten_url import flatten_github_repo
+from tap.scripts.flatten.flatten_script import flatten_script
 from rich.console import Console
 from rich.markdown import Markdown
 from xdg_base_dirs import xdg_state_home
 from conduit.sync import Response
+from pathlib import Path
 import argparse
 import sys
 import json
@@ -79,6 +81,12 @@ def main():
         action="store_true",
         help="Pretty-print the output XML",
     )
+    parser.add_argument(
+        "-t",
+        "--tree",
+        action="store_true",
+        help="Print the tree structure of the flattened target",
+    )
 
     args = parser.parse_args()
     target = args.target
@@ -89,38 +97,6 @@ def main():
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    try:
-        if target.startswith("https://github.com/"):
-            # Process GitHub repository
-            output = flatten_github_repo(target)
-        else:
-            # Process local directory (including ".")
-            output = flatten_directory(target)
-
-    except Exception as e:
-        print(f"Error processing target '{target}': {e}", file=sys.stderr)
-        sys.exit(1)
-
-    assert output is not None, "No output generated from the target."
-
-    # Handle --last flag to retrieve previous response
-    if args.last:
-        previous_response = retrieve_response()
-        if previous_response is not None:
-            if args.pretty:
-                console = Console()
-                md = Markdown(previous_response.content)
-                console.print(md)
-                exit(0)
-            else:
-                print(previous_response.content)
-                exit(0)
-        else:
-            print("No previous response found.", file=sys.stderr)
-        return
-
-    # Here we definitely need output
-    assert output is not None, "No target repo provided."
     # Handle --docs flag to generate README
     if args.docs:
         from tap.scripts.flatten.generate_docs import generate_docs
@@ -135,12 +111,49 @@ def main():
             console = Console()
             md = Markdown(response.content)
             console.print(md)
+            exit(0)
         else:
             print(response.content)
+            exit(0)
 
-    # Finally, print output.
+    # Create output (flattened XML) based on target type
+    output: str | None = None
+    tree: str | None = None
+
+    try:
+        if target.startswith("https://github.com/"):
+            # Process GitHub repository
+            output = flatten_github_repo(target)
+        else:
+            try:
+                input_path = Path(target).resolve()
+                if not input_path.exists():
+                    raise FileNotFoundError(f"Path '{target}' does not exist.")
+                if input_path.is_dir():
+                    output = flatten_directory(input_path)
+                elif input_path.is_file():
+                    tree, output = flatten_script(input_path)
+            except Exception:
+                raise ValueError(f"Invalid target path: '{target}'")
+    except Exception as e:
+        print(f"Error processing target '{target}': {e}", file=sys.stderr)
+        sys.exit(1)
+
+    assert output is not None, "No output generated from the target."
+
+    # Print output
+    if args.tree and tree is not None:
+        print("Tree Structure:\n")
+        print(tree)
+        exit(0)
+    if args.pretty:
+        console = Console()
+        md = Markdown(output)
+        console.print(md)
+        exit(0)
     else:
         print(output)
+        exit(0)
 
 
 if __name__ == "__main__":
