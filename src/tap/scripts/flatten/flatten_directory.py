@@ -1,86 +1,176 @@
-"""
-Local directory processing for the Flatten tool.
-Handles flattening local project directories into XML format.
-"""
-
 import os
 from pathlib import Path
-from typing import Callable
-from collections.abc import Iterable
 
-from tap.scripts.flatten.flatten_xml import (
-    package_to_xml,
-    should_exclude_path,
-    should_include_file,
-)
+# --- Configuration ---
+
+# Directories to ignore during walk
+IGNORE_DIRS = {
+    "dev",
+    "venv",
+    ".venv",
+    "__pycache__",
+    ".git",
+    "node_modules",
+    "tests",
+    "docs",
+    "site-packages",
+    ".idea",
+    ".vscode",
+    "target",
+    "build",
+    "dist",
+    ".egg-info",
+    ".mypy_cache",
+    ".pytest_cache",
+}
+
+# Specific filenames to ignore (exact match)
+IGNORE_FILES = {
+    "uv.lock",
+    "poetry.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "Cargo.lock",
+    "Gemfile.lock",
+    "composer.lock",
+    ".DS_Store",
+    ".env",  # Security: never print env files
+}
+
+# Optional: strict extension filtering.
+# If you want ALL text files, leave this empty or remove the check.
+# Currently configured to allow standard dev files but filter out binaries/images.
+INCLUDE_EXTENSIONS = {
+    ".py",
+    ".toml",
+    ".lua",
+    ".jinja2",
+}
 
 
-def read_local_file(file_path: str) -> str:
-    """Read content from a local file."""
-    with open(file_path, encoding="utf-8") as f:
-        return f.read()
-
-
-def get_local_file_iterator(directory: Path) -> Callable:
+def collect_files(root_path: Path) -> list[Path]:
     """
-    Return a function that iterates over files in a local directory.
-
-    Args:
-        directory: Path to the directory to iterate
-
-    Returns:
-        Function that yields (file_path, filename) tuples
+    Walks the directory recursively and collects all valid file paths.
+    Respects IGNORE_DIRS and IGNORE_FILES.
     """
+    collected_files = []
 
-    def iterator() -> Iterable[tuple[str, str]]:
-        for dirpath, dirnames, filenames in os.walk(directory):
-            # Skip excluded directories
-            path_str = str(dirpath)
-            if should_exclude_path(path_str):
+    for dirpath, dirnames, filenames in os.walk(root_path):
+        # Modify dirnames in-place to prevent os.walk from entering ignored directories
+        dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS]
+
+        for filename in filenames:
+            # 1. Check specific file blocks
+            if filename in IGNORE_FILES:
                 continue
 
-            # Modify dirnames in-place to prevent os.walk from entering excluded dirs
-            i = 0
-            while i < len(dirnames):
-                dirname = dirnames[i]
-                test_path = os.path.join(dirpath, dirname)
-                if should_exclude_path(test_path):
-                    dirnames.pop(i)
-                else:
-                    i += 1
+            file_path = Path(dirpath) / filename
 
-            # Process files in non-excluded directories
-            for filename in filenames:
-                if should_include_file(filename):
-                    file_path = os.path.join(dirpath, filename)
-                    # Convert to relative path from the base directory
-                    relative_path = os.path.relpath(file_path, directory)
-                    # Normalize path separators for consistency
-                    relative_path = relative_path.replace(os.sep, "/")
-                    yield (relative_path, filename)
+            # 2. Check extensions (if configured)
+            # If you want to be strict, uncomment the next two lines:
+            if file_path.suffix not in INCLUDE_EXTENSIONS:
+                continue
 
-    return iterator
+            collected_files.append(file_path)
+
+    return collected_files
 
 
-def flatten_directory(directory_path: str | Path = ".") -> str:
+def _generate_tree_string(files: list[Path], project_root: Path) -> str:
+    """Generates a visual tree structure string."""
+    lines = []
+    try:
+        rel_paths = sorted([f.relative_to(project_root) for f in files])
+    except ValueError:
+        rel_paths = sorted([f for f in files])
+
+    lines.append(f"🌳 Project Tree for: {project_root.name}")
+    lines.append(f"📍 Root: {project_root}")
+
+    printed_dirs = set()
+
+    for path in rel_paths:
+        parts = path.parts
+        # Directory structure
+        for i in range(len(parts) - 1):
+            current_dir = Path(*parts[: i + 1])
+            if current_dir not in printed_dirs:
+                indent = "│   " * i
+                lines.append(f"{indent}├── 📂 {parts[i]}/")
+                printed_dirs.add(current_dir)
+
+        # File
+        depth = len(parts) - 1
+        indent = "│   " * depth
+        lines.append(f"{indent}├── 📜 {parts[-1]}")
+
+    lines.append(f"\nTotal files: {len(files)}")
+    lines.append("=" * 40)
+
+    return "\n".join(lines)
+
+
+def _generate_blob_string(files: list[Path], project_root: Path) -> str:
+    """Generates the content blob string in Markdown format."""
+    lines = []
+    lines.append(f"CONTEXT: {len(files)} files found in {project_root.name}.\n")
+
+    # Sort files for deterministic output
+    try:
+        sorted_files = sorted(files, key=lambda f: f.relative_to(project_root))
+    except ValueError:
+        sorted_files = sorted(files)
+
+    for f in sorted_files:
+        try:
+            rel_path = f.relative_to(project_root)
+
+            # Try reading as text
+            content = f.read_text(encoding="utf-8")
+
+            # Skip empty files if desired
+            if not content.strip():
+                continue
+
+            # Determine language for code block
+            ext = f.suffix.lower().replace(".", "")
+            lang = ext if ext else "text"
+
+            lines.append(f"## FILE: {rel_path}")
+            lines.append(f"```{lang}")
+            lines.append(content)
+            lines.append("```\n")
+        except UnicodeDecodeError:
+            # Skip binary files silently
+            pass
+        except Exception as e:
+            lines.append(f"## FILE: {rel_path} (Error reading file: {e})\n")
+
+    return "\n".join(lines)
+
+
+def flatten_directory(directory_path: Path | str) -> tuple[str, str]:
     """
-    Flatten a local directory into XML format.
+    Flattens a directory into a dependency tree and a markdown content blob.
 
     Args:
-        directory_path: Path to the directory to flatten (default: current directory)
+        directory_path: Path to the directory to flatten.
 
     Returns:
-        XML string representation of the directory
+        tuple[str, str]: (tree_visualization, content_blob)
     """
-    directory = Path(directory_path).resolve()
-    project_name = directory.name
+    root = Path(directory_path).resolve()
 
-    # Create the path iterator for this directory
-    path_iterator = get_local_file_iterator(directory)
+    if not root.exists():
+        raise FileNotFoundError(f"Directory not found: {root}")
+    if not root.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {root}")
 
-    # Create file reader that handles absolute paths
-    def file_reader(relative_path: str) -> str:
-        absolute_path = directory / relative_path
-        return read_local_file(str(absolute_path))
+    # 1. Collect all relevant files
+    files = collect_files(root)
 
-    return package_to_xml(project_name, file_reader, path_iterator)
+    # 2. Generate Strings
+    tree_str = _generate_tree_string(files, root)
+    blob_str = _generate_blob_string(files, root)
+
+    return tree_str, blob_str
