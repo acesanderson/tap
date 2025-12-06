@@ -18,7 +18,6 @@ from tap.scripts.flatten.flatten_directory import flatten_directory
 from tap.scripts.flatten.flatten_script import flatten_script
 from rich.console import Console
 from rich.markdown import Markdown
-from conduit.sync import Response
 from pathlib import Path
 import argparse
 import sys
@@ -92,6 +91,7 @@ def main():
 
     # Handle --docs flag to generate README
     if args.docs:
+        from conduit.sync import Response
         from tap.scripts.flatten.generate_docs import generate_docs
 
         prompt_type = args.verbose
