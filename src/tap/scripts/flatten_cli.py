@@ -93,6 +93,7 @@ def main():
     if args.docs:
         from conduit.sync import Response
         from tap.scripts.flatten.generate_docs import generate_docs
+        from conduit.sync import Response
 
         prompt_type = args.verbose
         response = generate_docs(project_string=output, prompt_type=prompt_type)
