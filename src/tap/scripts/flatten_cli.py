@@ -91,15 +91,10 @@ def main():
 
     # Handle --docs flag to generate README
     if args.docs:
-        from conduit.sync import Response
         from tap.scripts.flatten.generate_docs import generate_docs
-        from conduit.sync import Response
 
         prompt_type = args.verbose
         response = generate_docs(project_string=output, prompt_type=prompt_type)
-        assert isinstance(response, Response), (
-            f"Expected Response object from generate_docs, got {type(response)}"
-        )
         if args.pretty:
             console = Console()
             md = Markdown(str(response.content))
