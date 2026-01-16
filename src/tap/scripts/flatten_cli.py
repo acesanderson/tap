@@ -47,6 +47,7 @@ def main():
         "--verbose",
         nargs="?",
         choices=["t", "v", "c"],
+        default="t",
         help="Enable verbose readme. Options: 't' (terse, default), 'v' (verbose), 'c' (critique'.",
     )
     parser.add_argument(
