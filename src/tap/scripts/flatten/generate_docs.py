@@ -1,7 +1,11 @@
-from conduit.sync import Conduit, Prompt, Model, Response, Verbosity
+from __future__ import annotations
+from conduit.sync import Conduit, Prompt, Verbosity
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
 from rich.console import Console
+
+if TYPE_CHECKING:
+    from conduit.domain.conversation.conversation import Conversation
 
 # Constants
 PROMPT_DIR = Path(__file__).parent / "prompts"
@@ -10,12 +14,10 @@ PROMPT_FILES = {
     "verbose": PROMPT_DIR / "verbose_docs_prompt.jinja2",
     "critique": PROMPT_DIR / "docs_critique_prompt.jinja2",
 }
-PREFERRED_MODEL = "gemini2.5"
+PREFERRED_MODEL = "flash"
 VERBOSITY = Verbosity.COMPLETE
 CONSOLE = Console()
 
-# Our singleton
-Model.console = CONSOLE
 
 # Verify prompt_files exist
 for key in PROMPT_FILES:
@@ -25,7 +27,9 @@ for key in PROMPT_FILES:
         )
 
 
-def generate_docs(project_string: str, prompt_type: Literal["t", "v", "c"]) -> Response:
+def generate_docs(
+    project_string: str, prompt_type: Literal["t", "v", "c"]
+) -> Conversation:
     """
     Generate documentation from an XML string using a predefined prompt and model.
     """
@@ -42,12 +46,8 @@ def generate_docs(project_string: str, prompt_type: Literal["t", "v", "c"]) -> R
     prompt_file = PROMPT_FILES[prompt_type]
     # Build the conduit
     prompt = Prompt(prompt_file.read_text())
-    model = Model(PREFERRED_MODEL)
-    conduit = Conduit(prompt=prompt, model=model)
-    response = conduit.run(input_variables={"code": project_string}, verbose=VERBOSITY)
-    # Validate response type
-    if not isinstance(response, Response):
-        raise ValueError(
-            f"Expected response to be of type Response, got {type(response)}"
-        )
+    conduit = Conduit.create(
+        prompt=prompt, model=PREFERRED_MODEL, verbosity=VERBOSITY, console=CONSOLE
+    )
+    response = conduit.run(input_variables={"code": project_string})
     return response
