@@ -1,4 +1,5 @@
 from __future__ import annotations
+from conduit.config import settings
 from conduit.sync import Conduit, Prompt, Verbosity
 from pathlib import Path
 from typing import Literal, TYPE_CHECKING
@@ -16,6 +17,7 @@ PROMPT_FILES = {
 }
 PREFERRED_MODEL = "flash"
 VERBOSITY = Verbosity.SILENT
+CACHE = settings.default_cache("flatten")
 CONSOLE = Console()
 
 
@@ -47,7 +49,12 @@ def generate_docs(
     # Build the conduit
     prompt = Prompt(prompt_file.read_text())
     conduit = Conduit.create(
-        prompt=prompt, model=PREFERRED_MODEL, verbosity=VERBOSITY, console=CONSOLE
+        project_name="flatten",
+        prompt=prompt,
+        model=PREFERRED_MODEL,
+        verbosity=VERBOSITY,
+        console=CONSOLE,
+        cache=True,
     )
     response = conduit.run(input_variables={"code": project_string})
     return response
