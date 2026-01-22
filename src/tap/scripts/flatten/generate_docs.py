@@ -15,7 +15,7 @@ PROMPT_FILES = {
     "critique": PROMPT_DIR / "docs_critique_prompt.jinja2",
 }
 PREFERRED_MODEL = "flash"
-VERBOSITY = Verbosity.COMPLETE
+VERBOSITY = Verbosity.SILENT
 CONSOLE = Console()
 
 
