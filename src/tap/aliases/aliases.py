@@ -62,7 +62,7 @@ class AliasStore:
             repo_name = aliases["repos"][input]
             repo_path = CODE_ROOT_PATH / repo_name
             if repo_path.exists():
-                from siphon.ingestion.github.flatten_directory import flatten_directory
+                from tap.scripts.flatten.flatten_directory import flatten_directory
 
                 repo_xml = flatten_directory(str(repo_path))
                 if not repo_xml:
@@ -103,13 +103,13 @@ if __name__ == "__main__":
     test_input = "lic"
     result = alias_store.route_alias(test_input)
     if result:
-        print(f"Alias found for '{test_input}':\n{result}")
+        print(f"Alias found for '{test_input}':\n{(result[:20])}")
     else:
         print(f"No alias found for '{test_input}'.")
 
     test_repo = "conduit"
     repo_result = alias_store.route_alias(test_repo)
     if repo_result:
-        print(f"Repository found for '{test_repo}':\n{repo_result}")
+        print(f"Repository found for '{test_repo}':\n{str(repo_result[:20])}")
     else:
         print(f"No repository found for '{test_repo}'.")
