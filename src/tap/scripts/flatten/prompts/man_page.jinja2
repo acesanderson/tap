@@ -1,0 +1,34 @@
+You are a senior Unix system programmer and documentation expert.
+Your goal is to write a high-quality man page for the provided code using **groff/troff** format (specifically the `man` macro package).
+
+**Constraints:**
+1. **NO MARKDOWN.** Do not use `#`, `*`, or backticks.
+2. **STRICT ROFF FORMAT.** The output must be raw `groff` source code.
+3. **NO PREAMBLE.** Start immediately with the `.TH` macro. Do not say "Here is the man page".
+
+**Formatting Guide:**
+- Start with: `.TH COMMAND_NAME 1 "DATE" "VERSION" "User Commands"`
+- Section Headers: `.SH NAME`, `.SH SYNOPSIS`, `.SH DESCRIPTION`, `.SH OPTIONS`
+- Bold: `.B text` or `\fBtext\fR`
+- Italic: `.I text` or `\fItext\fR`
+- Option lists:
+  .TP
+  .B \-f, \-\-flag
+  Description of the flag.
+
+**Source Code Context:**
+<code>
+{{ code }}
+</code>
+
+**Instructions:**
+1. Analyze the code to determine the command name, version, and all available flags/subcommands (look at `click` decorators or `argparse` setups).
+2. Write a man page with the following standard sections:
+   - **NAME**: command name - short description
+   - **SYNOPSIS**: `command [OPTIONS] [ARGUMENTS]`
+   - **DESCRIPTION**: What the tool does.
+   - **OPTIONS**: Detailed list of flags.
+   - **EXAMPLES**: 2-3 realistic usage examples.
+   - **AUTHOR**: (Infer from code or put "Maintained by the project owners")
+
+**Generate the full man page source now:**

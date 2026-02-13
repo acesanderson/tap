@@ -46,9 +46,9 @@ def main():
         "-v",
         "--verbose",
         nargs="?",
-        choices=["t", "v", "c"],
+        choices=["t", "v", "c", "m"],
         default="t",
-        help="Enable verbose readme. Options: 't' (terse, default), 'v' (verbose), 'c' (critique'.",
+        help="Enable verbose readme. Options: 't' (terse, default), 'v' (verbose), 'c' (critique'), 'm' ('manpage').",
     )
     parser.add_argument(
         "-p",
@@ -61,6 +61,12 @@ def main():
         "--tree",
         action="store_true",
         help="Print the tree structure of the flattened target",
+    )
+    parser.add_argument(
+        "-s",
+        "--save",
+        type=str,
+        help="Save the generated manpage for a provided project name.",
     )
 
     args = parser.parse_args()
@@ -96,6 +102,14 @@ def main():
 
         prompt_type = args.verbose
         response = generate_docs(project_string=output, prompt_type=prompt_type)
+        if args.save:
+            from tap.scripts.flatten.generate_docs import install_manpage
+
+            project_name = args.save
+            print(project_name)
+            manpage_text = str(response.content)
+            install_manpage(project_name=project_name, manpage_text=manpage_text)
+            exit()
         if args.pretty:
             console = Console()
             md = Markdown(str(response.content))
