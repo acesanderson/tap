@@ -32,9 +32,11 @@ headwater_api = { path = "../headwater/headwater-api", editable = true }
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]
 tap = "tap.cli.main:main"
-flatten = "tap.scripts.flatten_cli:main"
 ocr = "tap.scripts.ocr_cli:main"
 peek = "tap.scripts.peek_cli:main"
 play = "tap.scripts.play_cli:main"
 record = "tap.scripts.record_cli:main"
 survey = "tap.scripts.survey_cli:main"
+flatten = "tap.scripts.flatten_cli:main"
+manpage = "tap.scripts.shortcuts:manpage_entrypoint" # flatten alias
+readme = "tap.scripts.shortcuts:readme_entrypoint" # flatten alias
