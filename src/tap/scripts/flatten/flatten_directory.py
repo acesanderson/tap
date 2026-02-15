@@ -48,11 +48,19 @@ INCLUDE_EXTENSIONS = {
 }
 
 
-def collect_files(root_path: Path) -> list[Path]:
+def collect_files(root_path: Path, include_extensions: set[str] | None = None) -> list[Path]:
     """
     Walks the directory recursively and collects all valid file paths.
     Respects IGNORE_DIRS and IGNORE_FILES.
+
+    Args:
+        root_path: Directory to walk
+        include_extensions: Set of extensions to include (e.g., {'.py', '.json'}).
+                          If None, uses INCLUDE_EXTENSIONS default.
     """
+    if include_extensions is None:
+        include_extensions = INCLUDE_EXTENSIONS
+
     collected_files = []
 
     for dirpath, dirnames, filenames in os.walk(root_path):
@@ -66,9 +74,8 @@ def collect_files(root_path: Path) -> list[Path]:
 
             file_path = Path(dirpath) / filename
 
-            # 2. Check extensions (if configured)
-            # If you want to be strict, uncomment the next two lines:
-            if file_path.suffix not in INCLUDE_EXTENSIONS:
+            # 2. Check extensions
+            if file_path.suffix not in include_extensions:
                 continue
 
             collected_files.append(file_path)
@@ -149,12 +156,14 @@ def _generate_blob_string(files: list[Path], project_root: Path) -> str:
     return "\n".join(lines)
 
 
-def flatten_directory(directory_path: Path | str) -> tuple[str, str]:
+def flatten_directory(directory_path: Path | str, include_extensions: set[str] | None = None) -> tuple[str, str]:
     """
     Flattens a directory into a dependency tree and a markdown content blob.
 
     Args:
         directory_path: Path to the directory to flatten.
+        include_extensions: Set of extensions to include (e.g., {'.py', '.json'}).
+                          If None, uses INCLUDE_EXTENSIONS default.
 
     Returns:
         tuple[str, str]: (tree_visualization, content_blob)
@@ -167,7 +176,7 @@ def flatten_directory(directory_path: Path | str) -> tuple[str, str]:
         raise NotADirectoryError(f"Path is not a directory: {root}")
 
     # 1. Collect all relevant files
-    files = collect_files(root)
+    files = collect_files(root, include_extensions)
 
     # 2. Generate Strings
     tree_str = _generate_tree_string(files, root)

@@ -14,13 +14,26 @@ Options:
     -v, --verbose     Enable verbose readme generation (default is terse)
 """
 
-from tap.scripts.flatten.flatten_directory import flatten_directory
+from tap.scripts.flatten.flatten_directory import flatten_directory, INCLUDE_EXTENSIONS
 from tap.scripts.flatten.flatten_script import flatten_script
 from rich.console import Console
 from rich.markdown import Markdown
 from pathlib import Path
 import argparse
 import sys
+
+
+def normalize_extension(ext: str) -> str:
+    """
+    Normalize extension format: strip whitespace, lowercase, ensure leading dot.
+
+    Examples:
+        'json' -> '.json'
+        '.JSON' -> '.json'
+        ' .md ' -> '.md'
+    """
+    ext = ext.strip().lower()
+    return ext if ext.startswith('.') else f'.{ext}'
 
 
 def main():
@@ -68,8 +81,38 @@ def main():
         type=str,
         help="Save the generated manpage for a provided project name.",
     )
+    parser.add_argument(
+        "--list-extensions",
+        action="store_true",
+        help="Show default file extensions and exit.",
+    )
+
+    # Extension filtering (mutually exclusive)
+    ext_group = parser.add_mutually_exclusive_group()
+    ext_group.add_argument(
+        "-i",
+        "--include",
+        nargs="+",
+        metavar="EXT",
+        help="Include only these extensions (e.g., -i .json .md .yaml). Replaces defaults. Only applies to directory targets.",
+    )
+    ext_group.add_argument(
+        "-e",
+        "--exclude",
+        nargs="+",
+        metavar="EXT",
+        help="Exclude these extensions from defaults (e.g., -e .toml .lua). Only applies to directory targets.",
+    )
 
     args = parser.parse_args()
+
+    # Handle --list-extensions early exit
+    if args.list_extensions:
+        print("Default file extensions:")
+        for ext in sorted(INCLUDE_EXTENSIONS):
+            print(f"  {ext}")
+        sys.exit(0)
+
     target = args.target
 
     # Detect no input, if no args provided, show help
@@ -77,6 +120,14 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
+
+    # Compute final extension set based on -i/-e flags
+    include_extensions = None  # None means use defaults
+    if args.include:
+        include_extensions = {normalize_extension(ext) for ext in args.include}
+    elif args.exclude:
+        exclude_set = {normalize_extension(ext) for ext in args.exclude}
+        include_extensions = INCLUDE_EXTENSIONS - exclude_set
 
     # Create output (flattened XML) based on target type
     output: str | None = None
@@ -87,7 +138,7 @@ def main():
         if not input_path.exists():
             raise FileNotFoundError(f"Path '{target}' does not exist.")
         if input_path.is_dir():
-            tree, output = flatten_directory(input_path)
+            tree, output = flatten_directory(input_path, include_extensions)
         elif input_path.is_file():
             tree, output = flatten_script(input_path)
     except Exception:
