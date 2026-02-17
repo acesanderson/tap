@@ -12,6 +12,7 @@ dependencies = [
     "click>=8.3.0",
     "dbclients",
     "headwater_api",
+    "pyaudio>=0.2.14",
     "pydub>=0.25.1",
     "pytesseract>=0.3.13",
     "rapidfuzz>=3.14.1",
