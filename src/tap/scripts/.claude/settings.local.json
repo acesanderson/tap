@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python flatten_cli.py:*)"
+      "Bash(python flatten_cli.py:*)",
+      "Bash(python -m tap.scripts.flatten_cli:*)",
+      "Bash(bash)"
     ]
   }
 }
