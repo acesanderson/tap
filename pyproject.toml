@@ -29,6 +29,7 @@ include = ["src/tap/py.typed"]
 [tool.uv.sources]
 dbclients = { path = "../dbclients-project", editable = true }
 headwater_api = { path = "../headwater/headwater-api", editable = true }
+siphon_api = { path = "../siphon/siphon-api", editable = true }
 
 # ── Scripts ────────────────────────────────────────────────────────────────────
 [project.scripts]
@@ -41,3 +42,4 @@ survey = "tap.scripts.survey_cli:main"
 flatten = "tap.scripts.flatten_cli:main"
 manpage = "tap.scripts.shortcuts:manpage_entrypoint" # flatten alias
 readme = "tap.scripts.shortcuts:readme_entrypoint" # flatten alias
+url = "tap.scripts.url_cli:main"

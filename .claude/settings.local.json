@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ocr:*)",
+      "Bash(url \"https://en.wikipedia.org/wiki/Sourdough\")",
+      "Bash(siphon extract:*)"
+    ]
+  }
+}
