@@ -53,6 +53,7 @@ def grab_image_from_clipboard() -> str | None:
     else:
         console.print("No image detected.", style="red")
         import sys
+
         sys.exit()
 
 
@@ -107,7 +108,7 @@ def describe_image_with_vlm(image_content) -> str:
         params=params,
         options=options,
     )
-    client = HeadwaterClient()
+    client = HeadwaterClient(host_alias="deepwater")
     response = client.conduit.query_generate(request)
     return str(response)
 
@@ -122,7 +123,8 @@ def main():
         help="Path to an image file. If not provided, uses clipboard.",
     )
     parser.add_argument(
-        "--llm", "-l",
+        "--llm",
+        "-l",
         action="store_true",
         help=f"Use VLM ({VLM_MODEL}) via Headwater instead of Tesseract.",
     )
@@ -130,6 +132,7 @@ def main():
 
     if args.llm:
         from conduit.domain.message.message import ImageContent
+
         if args.filename:
             img = ImageContent.from_file(args.filename)
         else:
