@@ -108,7 +108,7 @@ def describe_image_with_vlm(image_content) -> str:
         params=params,
         options=options,
     )
-    client = HeadwaterClient(host_alias="deepwater")
+    client = HeadwaterClient()
     response = client.conduit.query_generate(request)
     return str(response)
 
