@@ -179,7 +179,7 @@ def main():
         "--include",
         nargs="+",
         metavar="EXT",
-        help="Include only these extensions (e.g., -i .json .md .yaml). Replaces defaults. Only applies to directory targets.",
+        help="Include only these extensions (e.g., -i .json .md .yaml). Replaces defaults. Use '*' to include all files except binaries. Only applies to directory targets.",
     )
     ext_group.add_argument(
         "-e",
@@ -230,7 +230,14 @@ def main():
     # Compute final extension set based on -i/-e flags
     include_extensions = None  # None means use defaults
     if args.include:
-        include_extensions = {normalize_extension(ext) for ext in args.include}
+        # Handle '*' wildcard - means all extensions except binaries
+        if "*" in args.include:
+            if len(args.include) > 1:
+                raise ValueError("Cannot mix '*' wildcard with specific extensions")
+            # '*' means include all text files, but we'll let the directory walker handle binary filtering
+            include_extensions = set()  # Empty set means include all files, let the walker handle filtering
+        else:
+            include_extensions = {normalize_extension(ext) for ext in args.include}
     elif args.exclude:
         exclude_set = {normalize_extension(ext) for ext in args.exclude}
         include_extensions = INCLUDE_EXTENSIONS - exclude_set

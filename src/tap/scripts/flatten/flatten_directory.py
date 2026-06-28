@@ -57,6 +57,7 @@ def collect_files(root_path: Path, include_extensions: set[str] | None = None) -
         root_path: Directory to walk
         include_extensions: Set of extensions to include (e.g., {'.py', '.json'}).
                           If None, uses INCLUDE_EXTENSIONS default.
+                          If empty set, includes all files (let binary filtering happen during blob generation).
     """
     if include_extensions is None:
         include_extensions = INCLUDE_EXTENSIONS
@@ -74,8 +75,8 @@ def collect_files(root_path: Path, include_extensions: set[str] | None = None) -
 
             file_path = Path(dirpath) / filename
 
-            # 2. Check extensions
-            if file_path.suffix not in include_extensions:
+            # 2. Check extensions - if include_extensions is empty, include all files
+            if include_extensions and file_path.suffix not in include_extensions:
                 continue
 
             collected_files.append(file_path)
